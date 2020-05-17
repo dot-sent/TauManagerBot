@@ -85,7 +85,13 @@ namespace TauManagerBot
                 var response = handler.HandleMessage(args, messageObj);
                 if (response.MessageHandled)
                 {
-                    await messageObj.Channel.SendMessageAsync(response.Response);
+                    var channel = messageObj.Channel;
+                    var dmChannel = await messageObj.Author.GetOrCreateDMChannelAsync();
+                    if (channel.Id != dmChannel.Id)
+                    {
+                        await dmChannel.SendMessageAsync("Hello there! This bot currently only responds via DM channels, please use this one in the future.");
+                    }
+                    await dmChannel.SendMessageAsync(response.Response);
                     return;
                 }
             }
