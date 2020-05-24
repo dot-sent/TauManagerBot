@@ -34,17 +34,23 @@ namespace TauManagerBot.Commands
                     var messageBuilder = new StringBuilder("Average stats for syndicate ");
                     messageBuilder.Append(syndicate.Tag);
                     messageBuilder.AppendLine();
-                    messageBuilder.AppendLine("---");
+                    messageBuilder.Append("```");
+                    messageBuilder.AppendLine("Tier | Players |  Total stat avg (STR/AGI/STA)  | TS median");
+                    messageBuilder.AppendLine("-----+---------+--------------------------------+----------");
                     foreach(var tier in syndicateMetrics.PlayerStats.Keys.OrderByDescending(k => k))
                     {
                         var tierStats = syndicateMetrics.PlayerStats[tier];
-                        messageBuilder.AppendFormat("Tier {0} - Player count: {1:d}, Total stat average {2:F2}, Total stat median {3:F2}",
+                        messageBuilder.AppendFormat("  {0}  |    {1,2:d}   | {2,7:F2} ({3,6:F2}/{4,6:F2}/{5,6:F2}) | {6,7:F2}",
                             tierStats.Tier,
                             tierStats.PlayerCount,
                             tierStats.StatTotal,
+                            tierStats.Strength,
+                            tierStats.Agility,
+                            tierStats.Stamina,
                             tierStats.StatTotalMedian);
                         messageBuilder.AppendLine();
                     }
+                    messageBuilder.Append("```");
                     return MessageResponse.Handled(messageBuilder.ToString());
                 }
             }

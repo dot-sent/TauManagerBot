@@ -38,6 +38,8 @@ namespace TauManagerBot
             _handlers.Add(new Stats(serviceProvider));
             _handlers.Add(new Connect(serviceProvider));
             _handlers.Add(new Subscribe(serviceProvider));
+            _handlers.Add(new Help(serviceProvider));
+
             _discordClientKey = configuration.GetValue<string>("DiscordClientKey");
         }
 
@@ -87,11 +89,16 @@ namespace TauManagerBot
                 {
                     var channel = messageObj.Channel;
                     var dmChannel = await messageObj.Author.GetOrCreateDMChannelAsync();
-                    if (channel.Id != dmChannel.Id)
+                    if (messageObj.Author.Username == "Dotsent" && messageObj.Author.DiscriminatorValue == 5616)
                     {
-                        await dmChannel.SendMessageAsync("Hello there! This bot currently only responds via DM channels, please use this one in the future.");
+                        await channel.SendMessageAsync(response.Response);
+                    } else {
+                        if (channel.Id != dmChannel.Id)
+                        {
+                            await dmChannel.SendMessageAsync("Hello there! This bot currently only responds via DM channels, please use this one in the future.");
+                        }
+                        await dmChannel.SendMessageAsync(response.Response);
                     }
-                    await dmChannel.SendMessageAsync(response.Response);
                     return;
                 }
             }
