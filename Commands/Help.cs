@@ -17,9 +17,9 @@ Hello, I'm friendly TauManager Bot! *(Don't mind my avatar, I told you I'm frien
 I accept the following commands:
 
 * !help - this command, lists help on all commands
-* !connect - connect your Discord account with your Manager account, needed if you want to setup notifications
+* !connect *player_name* - connect your Discord account with your Manager account, needed if you want to setup notifications
 * !stats *syndicate_tag* - lists current statistics by tier for a given syndicate tag (if found)
-* !subscribe *number* - change your notification subscription settings. Using this command is discouraged in favor of Discord Settings UI in the Manager
+* !subscribe *number* - Deprecated. Please use the settings page at https://dotsent.nl/Settings/Discord instead.
 
 Still got questions? Ping Dotsent!");
         }
