@@ -37,6 +37,7 @@ namespace TauManagerBot
             _handlers = new List<IMessageHandler>();
             _handlers.Add(new Stats(serviceProvider));
             _handlers.Add(new Connect(serviceProvider));
+            _handlers.Add(new Disconnect(serviceProvider));
             _handlers.Add(new Subscribe(serviceProvider));
             _handlers.Add(new Help(serviceProvider));
 
