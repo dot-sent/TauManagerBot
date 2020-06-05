@@ -92,17 +92,34 @@ namespace TauManagerBot
                 var response = handler.HandleMessage(args, messageObj);
                 if (response.MessageHandled)
                 {
-                    var channel = messageObj.Channel;
                     var dmChannel = await messageObj.Author.GetOrCreateDMChannelAsync();
-                    if (isOfficer)
+                    if (response.ChannelId != 0)
                     {
-                        await channel.SendMessageAsync(response.Response);
-                    } else {
-                        if (channel.Id != dmChannel.Id)
+                        var explicitChannel = _client.GetChannel(response.ChannelId);
+                        if (explicitChannel == null)
                         {
-                            await dmChannel.SendMessageAsync("Hello there! This bot currently only responds via DM channels, please use this one in the future.");
+                            await dmChannel.SendMessageAsync(string.Format("Can't find channel with id {0}, message not sent.", response.ChannelId));
+                        } else {
+                            var textChannel = explicitChannel as ISocketMessageChannel;
+                            if (textChannel == null)
+                            {
+                                await dmChannel.SendMessageAsync(string.Format("Channel with id {0} is NOT ISocketMessageChannel, message not sent.", response.ChannelId));
+                            } else {
+                                await textChannel.SendMessageAsync(response.Response);
+                            }
                         }
-                        await dmChannel.SendMessageAsync(response.Response);
+                    } else {
+                        var channel = messageObj.Channel;
+                        if (isOfficer)
+                        {
+                            await channel.SendMessageAsync(response.Response);
+                        } else {
+                            if (channel.Id != dmChannel.Id)
+                            {
+                                await dmChannel.SendMessageAsync("Hello there! This bot currently only responds via DM channels, please use this one in the future.");
+                            }
+                            await dmChannel.SendMessageAsync(response.Response);
+                        }
                     }
                     return;
                 }

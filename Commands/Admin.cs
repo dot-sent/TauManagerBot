@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,7 +41,10 @@ namespace TauManagerBot.Commands
                 }
             } else if (args[1] == "say") {
                 if (args.Length < 4) return MessageResponse.NotHandled();
-                
+                ulong channelId = 0;
+                var result = ulong.TryParse(args[2], out channelId);
+                if (!result) return MessageResponse.Handled("Sorry, boss, can't parse the channel id!");
+                return MessageResponse.Handled(string.Join(' ', args.Skip(3)), channelId);
             }
             return MessageResponse.Handled("Sorry, boss, I don't get it!");
         }
