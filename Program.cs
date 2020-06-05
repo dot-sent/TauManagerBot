@@ -41,6 +41,7 @@ namespace TauManagerBot
                     services.AddScoped<ICampaignLogic, CampaignLogic>();
                     services.AddScoped<IPlayerLogic, PlayerLogic>();
                     services.AddScoped<INotificationLogic, NotificationLogic>();
+                    services.AddScoped<IIntegrationLogic, IntegrationLogic>();
                     services.AddSingleton<IRegisteredDiscordUsersService, RegisteredDiscordUsersService>();
                     services.AddSingleton<INotificationQueueService, NotificationQueueService>();
                 });

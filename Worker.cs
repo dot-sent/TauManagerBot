@@ -35,6 +35,7 @@ namespace TauManagerBot
             _serviceProvider = serviceProvider;
             _notificationQueueService = notificationQueueService;
             _handlers = new List<IMessageHandler>();
+            _handlers.Add(new Admin(serviceProvider));
             _handlers.Add(new Stats(serviceProvider));
             _handlers.Add(new Connect(serviceProvider));
             _handlers.Add(new Disconnect(serviceProvider));
@@ -82,6 +83,9 @@ namespace TauManagerBot
                 message.Author.IsBot)
                 return;
 
+            var officerService = _serviceProvider.GetRequiredService<IRegisteredDiscordUsersService>();
+            bool isOfficer = officerService.IsOfficer(messageObj.Author.Username + "#" + messageObj.Author.DiscriminatorValue.ToString());
+
             var args = messageObj.Content.Split(' ');
             foreach(IMessageHandler handler in _handlers)
             {
@@ -90,7 +94,7 @@ namespace TauManagerBot
                 {
                     var channel = messageObj.Channel;
                     var dmChannel = await messageObj.Author.GetOrCreateDMChannelAsync();
-                    if (messageObj.Author.Username == "Dotsent" && messageObj.Author.DiscriminatorValue == 5616)
+                    if (isOfficer)
                     {
                         await channel.SendMessageAsync(response.Response);
                     } else {
