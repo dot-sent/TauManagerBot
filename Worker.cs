@@ -41,6 +41,7 @@ namespace TauManagerBot
             _handlers.Add(new Disconnect(serviceProvider));
             _handlers.Add(new Subscribe(serviceProvider));
             _handlers.Add(new Help(serviceProvider));
+            _handlers.Add(new Fuel(serviceProvider));
 
             _discordClientKey = configuration.GetValue<string>("DiscordClientKey");
         }
@@ -60,7 +61,13 @@ namespace TauManagerBot
             await _client.StartAsync();
             _client.Ready += ClientReady;
             _client.MessageReceived += HandleCommandAsync;
+            //_client.UserJoined += HandleUserJoinedAsync;
             _notificationCheckTimer = new Timer(CheckNotificationQueue, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        }
+
+        private async Task HandleUserJoinedAsync(SocketGuildUser userInfo)
+        {
+            throw new NotImplementedException();
         }
 
         private Task ClientReady()

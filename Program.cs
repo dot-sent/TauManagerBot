@@ -44,6 +44,7 @@ namespace TauManagerBot
                     services.AddScoped<IIntegrationLogic, IntegrationLogic>();
                     services.AddSingleton<IRegisteredDiscordUsersService, RegisteredDiscordUsersService>();
                     services.AddSingleton<INotificationQueueService, NotificationQueueService>();
+                    services.AddSingleton<IFuelTrackerService, FuelTrackerService>();
                 });
     }
 }
