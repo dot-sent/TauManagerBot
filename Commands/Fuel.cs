@@ -25,7 +25,7 @@ namespace TauManagerBot.Commands
             var resultBuilder = new StringBuilder(string.Format("Found {0} fuel price(s):\n", result.Count()));
             foreach(var fuelInfo in result)
             {
-                resultBuilder.AppendFormat("{0}/{1}: {2,7:F2}, recorded at {3:d}\n",
+                resultBuilder.AppendFormat("{0}/{1}: {2,7:F2}, recorded at {3:u}\n",
                     fuelInfo.System_Name,
                     fuelInfo.Station_Name,
                     fuelInfo.Last_Price,
