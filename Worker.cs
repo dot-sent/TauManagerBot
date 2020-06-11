@@ -42,6 +42,7 @@ namespace TauManagerBot
             _handlers.Add(new Subscribe(serviceProvider));
             _handlers.Add(new Help(serviceProvider));
             _handlers.Add(new Fuel(serviceProvider));
+            _handlers.Add(new Ration(serviceProvider));
 
             _discordClientKey = configuration.GetValue<string>("DiscordClientKey");
         }

@@ -11,6 +11,6 @@ namespace TauManagerBot.Commands
             _serviceProvider = serviceProvider;
         }
 
-        public abstract MessageResponse HandleMessage(string[] messageParts, SocketUserMessage message);
+        public abstract MessageResponse HandleMessage(string[] args, SocketUserMessage message);
     }
 }
