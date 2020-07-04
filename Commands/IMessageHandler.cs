@@ -4,6 +4,6 @@ namespace TauManagerBot.Commands
 {
     public interface IMessageHandler
     {
-        MessageResponse HandleMessage(string[] messageParts, SocketUserMessage message);
+        MessageResponse HandleMessage(string[] args, SocketUserMessage message);
     }
 }
