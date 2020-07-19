@@ -1,8 +1,8 @@
 using System;
-using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Nito.AsyncEx.Synchronous;
+using TauManager.Core.Utils;
 
 namespace TauManagerBot
 {
@@ -10,23 +10,23 @@ namespace TauManagerBot
     {
         private DateTime _lastUpdated;
         private decimal _lastPrice;
-        private readonly Regex _priceRegex = new Regex("\"currency\">([0-9.]+)");
+        private IServiceProvider _serviceProvider;
+
+        public RationInfoService(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
 
         private async Task RefreshRationPrice()
         {
             if (DateTime.Now - _lastUpdated < TimeSpan.FromMinutes(10)) return;
-            var client = new HttpClient();
-            var result = await client.GetAsync("https://alpha.taustation.space/item/ration-1");
-            if (result.IsSuccessStatusCode)
+            using (var scope = _serviceProvider.CreateScope())
             {
-                var content = await result.Content.ReadAsStringAsync();
-                // Obligatory link: https://stackoverflow.com/a/1732454/625594
-                var isMatch = _priceRegex.IsMatch(content);
-                if (isMatch)
-                {
-                    var match = _priceRegex.Match(content);
-                    var parseResult = decimal.TryParse(match.Groups[1].Value, out _lastPrice);
-                    if (parseResult) _lastUpdated = DateTime.Now;
+                var tauStationService = scope.ServiceProvider.GetRequiredService<ITauStationClient>();
+                var prices = await tauStationService.GetItemPriceRange("ration-1");
+                _lastUpdated = DateTime.Now;
+                if (prices.Key > 0) {
+                    _lastPrice = prices.Key;
                 }
             }
         }

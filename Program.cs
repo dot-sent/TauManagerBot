@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TauManager;
 using TauManager.BusinessLogic;
+using TauManager.Core.Utils;
 using TauManager.Utils;
 
 namespace TauManagerBot
@@ -38,6 +39,7 @@ namespace TauManagerBot
                                 .UseLazyLoadingProxies()
                                 .UseNpgsql(hostContext.Configuration.GetConnectionString("TauDbContextConnection")));
                     services.AddScoped<ITauHeadClient, TauHead>();
+                    services.AddScoped<ITauStationClient, TauStationClient>();
                     services.AddScoped<ICampaignLogic, CampaignLogic>();
                     services.AddScoped<IPlayerLogic, PlayerLogic>();
                     services.AddScoped<INotificationLogic, NotificationLogic>();
@@ -45,6 +47,7 @@ namespace TauManagerBot
                     services.AddSingleton<IRegisteredDiscordUsersService, RegisteredDiscordUsersService>();
                     services.AddSingleton<INotificationQueueService, NotificationQueueService>();
                     services.AddSingleton<IFuelTrackerService, FuelTrackerService>();
+                    services.AddSingleton<ISotherynPriceTrackerService, SotherynPriceTrackerService>();
                     services.AddSingleton<IRationInfoService, RationInfoService>();
                 });
     }
