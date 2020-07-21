@@ -57,7 +57,7 @@ namespace TauManagerBot
             new TrackingSettings{
                 StationCode = "Sol/TNG",
                 TrackingItemSlug = "aged-stun-baton",
-                FuelPriceCoefficient = 0.2716M,
+                FuelPriceCoefficient = 0.2587M,
                 UseHighPrice = true
             },
             new TrackingSettings{
@@ -124,7 +124,7 @@ namespace TauManagerBot
                 StationCode = "BS/AMZ",
                 TrackingItemSlug = "minor-multi-stim-v3-1-019",
                 FuelPriceCoefficient = 1.3413M,
-                UseHighPrice = true
+                UseHighPrice = false
             },
             new TrackingSettings{
                 StationCode = "BS/MoO",
@@ -135,13 +135,13 @@ namespace TauManagerBot
             new TrackingSettings{
                 StationCode = "L726/JG",
                 TrackingItemSlug = "arc-masters-suit",
-                FuelPriceCoefficient = 5.3849M,
+                FuelPriceCoefficient = 5.0453M,
                 UseHighPrice = true
             },
             new TrackingSettings{
                 StationCode = "L726/OSH",
                 TrackingItemSlug = "dielectric-paladin-armor",
-                FuelPriceCoefficient = 5.0889M,
+                FuelPriceCoefficient = 4.7679M,
                 UseHighPrice = true
             },
             new TrackingSettings{
