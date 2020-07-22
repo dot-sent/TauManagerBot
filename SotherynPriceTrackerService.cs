@@ -63,7 +63,7 @@ namespace TauManagerBot
             new TrackingSettings{
                 StationCode = "Sol/NL",
                 TrackingItemSlug = "worn-repulsion-armor",
-                FuelPriceCoefficient = 1.1026M,
+                FuelPriceCoefficient = 0.9547M,
                 UseHighPrice = true
             },
             new TrackingSettings{
@@ -159,7 +159,7 @@ namespace TauManagerBot
             new TrackingSettings{
                 StationCode = "YZ/CVS",
                 TrackingItemSlug = "repulsion-armor",
-                FuelPriceCoefficient = 4.6628M,
+                FuelPriceCoefficient = 4.5227M,
                 UseHighPrice = true
             },
         };
