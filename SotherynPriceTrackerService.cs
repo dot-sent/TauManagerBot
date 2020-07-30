@@ -75,7 +75,7 @@ namespace TauManagerBot
             new TrackingSettings{
                 StationCode = "AC/PS",
                 TrackingItemSlug = "light-liquid-armor-suit",
-                FuelPriceCoefficient = 1.7466M,
+                FuelPriceCoefficient = 1.746626M,
                 UseHighPrice = true
             },
             new TrackingSettings{
@@ -167,11 +167,13 @@ namespace TauManagerBot
         // Not all of the `FuelInfo` fields are used in this class, but I prefer not to
         // duplicate the classes that have essentially the same functionality.
         private Dictionary<string, FuelInfo> _fuelInfo;
+        private Dictionary<string, FuelInfo> _trackingItemPrices;
 
         public SotherynPriceTrackerService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _fuelInfo = new Dictionary<string, FuelInfo>();
+            _trackingItemPrices = new Dictionary<string, FuelInfo>();
         }
 
         private async Task RefreshItemPricesFor(string stationOrSystemName)
@@ -183,13 +185,19 @@ namespace TauManagerBot
                 foreach(var stationTracking in stationsToProcess)
                 {
                     if (!_fuelInfo.ContainsKey(stationTracking.StationCode) ||
-                        DateTime.Now - _fuelInfo[stationTracking.StationCode].Last_Reading < TimeSpan.FromMinutes(10))
+                        DateTime.Now - _fuelInfo[stationTracking.StationCode].Last_Reading > TimeSpan.FromMinutes(10))
                     {
                         var priceData = await tauStationClient.GetItemPriceRange(stationTracking.TrackingItemSlug);
                         var price = (stationTracking.UseHighPrice ? priceData.Value : priceData.Key) /
                             stationTracking.FuelPriceCoefficient;
                         _fuelInfo[stationTracking.StationCode] = new FuelInfo{
                             Last_Price = price,
+                            Last_Reading = DateTime.Now,
+                            Station_Short_Name = stationTracking.StationCode,
+                            System_Name = stationTracking.SystemCode
+                        };
+                        _trackingItemPrices[stationTracking.StationCode] = new FuelInfo{
+                            Last_Price = stationTracking.UseHighPrice ? priceData.Value : priceData.Key,
                             Last_Reading = DateTime.Now,
                             Station_Short_Name = stationTracking.StationCode,
                             System_Name = stationTracking.SystemCode
@@ -210,6 +218,32 @@ namespace TauManagerBot
                 .ToDictionary(
                     fi => fi.Station_Short_Name,
                     fi => fi.Last_Price
+                );
+        }
+
+        public IDictionary<string, string> GetFuelPricesDebug(string stationOrSystemName)
+        {
+            var result = RefreshItemPricesFor(stationOrSystemName);
+            result.WaitAndUnwrapException();
+            return _trackingItemPrices == null ? null:
+                _trackingItemPrices.Values.Where(fi => fi.Station_Short_Name == stationOrSystemName ||
+                    fi.System_Name == stationOrSystemName ||
+                    fi.Station_Short_Name.StartsWith(stationOrSystemName))
+                .Select(
+                    fi => new {
+                        FuelInfo = fi,
+                        TrackingInfo = _trackingMap.SingleOrDefault(el => el.StationCode == fi.Station_Short_Name)
+                    }
+                )
+                .ToDictionary(
+                    fi => fi.FuelInfo.Station_Short_Name,
+                    fi => string.Format("Basic item with slug `{0}` had price {1,7:F2} at {2}; calculation: {1,7:F2} * {3,7:F2} = {4,7:F2}",
+                        fi.TrackingInfo == null ? "<undefined>" : fi.TrackingInfo.TrackingItemSlug,
+                        fi.FuelInfo.Last_Price,
+                        fi.FuelInfo.Last_Reading,
+                        fi.TrackingInfo == null ? 0 : fi.TrackingInfo.FuelPriceCoefficient,
+                        fi.FuelInfo.Last_Price * fi.TrackingInfo.FuelPriceCoefficient
+                    )
                 );
         }
     }
