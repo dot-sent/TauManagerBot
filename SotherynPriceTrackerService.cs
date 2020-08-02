@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +26,10 @@ namespace TauManagerBot
                     return StationCode.Split("/")[0];
                 }
             }
+            [DefaultValue(false)]
+            public bool RequiresDisambiguation { get; set; }
+            public string DisambiguationItemSlug { get; set; }
+            public decimal DisambiguationItemCoefficient { get; set; }
         }
 
         // This map might rather belong to the database, but I'm placing it into the code
@@ -100,7 +105,10 @@ namespace TauManagerBot
                 StationCode = "AC/BDX",
                 TrackingItemSlug = "light-thermoplastic-suit",
                 FuelPriceCoefficient = 0.9574M,
-                UseHighPrice = true
+                UseHighPrice = true,
+                RequiresDisambiguation = true,
+                DisambiguationItemSlug = "brain-booster-bites-tier-1",
+                DisambiguationItemCoefficient = 0.020107M
             },
             new TrackingSettings{
                 StationCode = "AC/YoG",
@@ -188,8 +196,25 @@ namespace TauManagerBot
                         DateTime.Now - _fuelInfo[stationTracking.StationCode].Last_Reading > TimeSpan.FromMinutes(10))
                     {
                         var priceData = await tauStationClient.GetItemPriceRange(stationTracking.TrackingItemSlug);
-                        var price = (stationTracking.UseHighPrice ? priceData.Value : priceData.Key) /
-                            stationTracking.FuelPriceCoefficient;
+                        decimal price;
+                        if (stationTracking.RequiresDisambiguation)
+                        {
+                            var disambiguationPriceData = await tauStationClient.GetItemPriceRange(stationTracking.DisambiguationItemSlug);
+                            var otherStationFuelPriceEstimate =
+                                disambiguationPriceData.Key * stationTracking.FuelPriceCoefficient / stationTracking.DisambiguationItemCoefficient;
+                            // Generously apply 20% margin for comparison to account
+                            // for eventual rounding or data quality errors
+                            if (0.8M * otherStationFuelPriceEstimate < priceData.Key &&
+                                priceData.Key < 1.2M * otherStationFuelPriceEstimate)
+                            {
+                                price = priceData.Value / stationTracking.FuelPriceCoefficient;
+                            } else {
+                                price = priceData.Key / stationTracking.FuelPriceCoefficient;
+                            }
+                        } else {
+                            price = (stationTracking.UseHighPrice ? priceData.Value : priceData.Key) /
+                                stationTracking.FuelPriceCoefficient;
+                        }
                         _fuelInfo[stationTracking.StationCode] = new FuelInfo{
                             Last_Price = price,
                             Last_Reading = DateTime.Now,
@@ -237,12 +262,12 @@ namespace TauManagerBot
                 )
                 .ToDictionary(
                     fi => fi.FuelInfo.Station_Short_Name,
-                    fi => string.Format("Basic item with slug `{0}` had price {1,7:F2} at {2}; calculation: {1,7:F2} * {3,7:F2} = {4,7:F2}",
+                    fi => string.Format("Basic item with slug `{0}` had price {1,7:F2} at {2}; calculation: {1,7:F2} / {3,7:F6} = {4,7:F2}",
                         fi.TrackingInfo == null ? "<undefined>" : fi.TrackingInfo.TrackingItemSlug,
                         fi.FuelInfo.Last_Price,
                         fi.FuelInfo.Last_Reading,
                         fi.TrackingInfo == null ? 0 : fi.TrackingInfo.FuelPriceCoefficient,
-                        fi.FuelInfo.Last_Price * fi.TrackingInfo.FuelPriceCoefficient
+                        fi.FuelInfo.Last_Price / (fi.TrackingInfo == null ? 1 : fi.TrackingInfo.FuelPriceCoefficient)
                     )
                 );
         }
