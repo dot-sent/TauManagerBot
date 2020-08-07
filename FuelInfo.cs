@@ -11,5 +11,6 @@ namespace TauManagerBot
             public string Station_Name { get; set; }
             public string Station_Short_Name { get; set; }
             public string System_Name { get; set; }
+            public decimal? Estimation { get; set; }
         }
 }
