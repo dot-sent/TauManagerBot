@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -19,6 +20,7 @@ namespace TauManagerBot
         private readonly ILogger<Worker> _logger;
         private DiscordSocketClient _client;
         private string _discordClientKey;
+        private Dictionary<ulong, ulong> _discordGreetingChannels;
         private List<IMessageHandler> _handlers;
         private Timer _notificationCheckTimer;
         private IServiceProvider _serviceProvider;
@@ -47,6 +49,9 @@ namespace TauManagerBot
             _handlers.Add(new Campaign(serviceProvider));
 
             _discordClientKey = configuration.GetValue<string>("DiscordClientKey");
+            _discordGreetingChannels = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, ulong>>(
+                configuration.GetValue<string>("GreetingChannelIds")
+            ).ToList().ToDictionary(kv => ulong.Parse(kv.Key), kv => kv.Value);
         }
 
         public void Dispose()
@@ -64,13 +69,24 @@ namespace TauManagerBot
             await _client.StartAsync();
             _client.Ready += ClientReady;
             _client.MessageReceived += HandleCommandAsync;
-            //_client.UserJoined += HandleUserJoinedAsync;
+            _client.UserJoined += HandleUserJoinedAsync;
             _notificationCheckTimer = new Timer(CheckNotificationQueue, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         }
 
         private async Task HandleUserJoinedAsync(SocketGuildUser userInfo)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("{time} User joined: '{1}' to guild `{2}`", DateTimeOffset.Now, userInfo.FullDiscordName(), userInfo.Guild.Name);
+            if (_discordGreetingChannels.ContainsKey(userInfo.Guild.Id)) {
+                _logger.LogInformation("{time} Attempting to send greeting message...", DateTimeOffset.Now);
+                var channel = userInfo.Guild.GetTextChannel(_discordGreetingChannels[userInfo.Guild.Id]);
+                _logger.LogInformation("{time} Channel identified...", DateTimeOffset.Now);
+                await channel.SendMessageAsync(String.Format("Hello {0} and welcome to {1}! I'm your friendly local bot.\n\n" + 
+                    "In order to receive member privileges, please confirm your identity via in-game chat first." + 
+                    " Once you receive your member status, please refrain from using this channel for any" + 
+                    " meaningful discussions, this channel is reserved for greeting new folks.\n\nCheers!",
+                    userInfo.Username, userInfo.Guild.Name));
+                }
+            return;
         }
 
         private Task ClientReady()
@@ -85,6 +101,7 @@ namespace TauManagerBot
 
             var messageObj = message as SocketUserMessage;
             if (message == null) return;
+            if (_discordGreetingChannels.ContainsValue(message.Channel.Id)) return;
 
             int argPos = 0;
 
@@ -94,7 +111,7 @@ namespace TauManagerBot
                 return;
 
             var officerService = _serviceProvider.GetRequiredService<IRegisteredDiscordUsersService>();
-            bool isOfficer = officerService.IsOfficer(messageObj.Author.Username + "#" + messageObj.Author.DiscriminatorValue.ToString());
+            bool isOfficer = officerService.IsOfficer(messageObj.FullDiscordAuthorLogin());
 
             var args = messageObj.Content.Split(' ');
             foreach(IMessageHandler handler in _handlers)

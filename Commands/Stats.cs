@@ -30,7 +30,7 @@ namespace TauManagerBot.Commands
                     return MessageResponse.HandledFormat("Can't find the syndicate with tag '{0}'", syndicateTag);
                 } else {
                     var playerLogic = scope.ServiceProvider.GetRequiredService<IPlayerLogic>();
-                    var syndicateMetrics = playerLogic.GetSyndicateMetrics(null, false, syndicate.Id);
+                    var syndicateMetrics = playerLogic.GetSyndicatePlayers(null, false, syndicate.Id);
                     var messageBuilder = new StringBuilder("Average stats for syndicate ");
                     messageBuilder.Append(syndicate.Tag);
                     messageBuilder.AppendLine();
