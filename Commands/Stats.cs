@@ -24,7 +24,7 @@ namespace TauManagerBot.Commands
             using (var scope = _serviceProvider.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<TauDbContext>();
-                var syndicate = dbContext.Syndicate.SingleOrDefault(s => s.Tag == syndicateTag);
+                var syndicate = dbContext.Syndicate.SingleOrDefault(s => syndicateTag.ToLower() == s.Tag.ToLower());
                 if (syndicate == null)
                 {
                     return MessageResponse.HandledFormat("Can't find the syndicate with tag '{0}'", syndicateTag);

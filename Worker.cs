@@ -172,7 +172,7 @@ namespace TauManagerBot
                                 var result = await channel.SendMessageAsync(notification.Message);
                                 notificationLogic.ReportNotificationStatus(notification.Id, true, string.Empty);
                             } catch (Exception e) {
-                                notificationLogic.ReportNotificationStatus(notification.Id, false, DateTime.Now.ToLongTimeString() + ": " + e.Message + "\n" + e.StackTrace);
+                                notificationLogic.ReportNotificationStatus(notification.Id, false, DateTime.Now.ToLongTimeString() + ": " + e.ToString());
                             }
                         }
                     }
