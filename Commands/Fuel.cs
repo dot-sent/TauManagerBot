@@ -22,7 +22,16 @@ namespace TauManagerBot.Commands
             var fuelService = _serviceProvider.GetRequiredService<IFuelTrackerService>();
             var result = fuelService.GetPrices(stationOrSystemName);
 
-            if (result == null || result.Count() == 0) return MessageResponse.Handled("Sorry, no results found. Please try again.");
+            if (result == null || result.Count() == 0)
+            {
+                var allSystemNames = fuelService.GetValidSystemNames();
+                var allSystemShortcuts = fuelService.GetValidSystemShortcuts();
+                return MessageResponse.HandledFormat("No results found for system or station name '{0}'. Valid system names are: {1} or shortcuts: {2}.",
+                        stationOrSystemName,
+                        String.Join(", ", allSystemNames),
+                        String.Join(", ", allSystemShortcuts)
+                    );
+            }
             var resultBuilder = new StringBuilder(string.Format("Found {0} fuel price(s):\n", result.Count()));
             resultBuilder.AppendLine("```");
             resultBuilder.AppendLine("┌──────────┬─────────┬──────────────────────┬─────────┐");

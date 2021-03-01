@@ -45,10 +45,24 @@ namespace TauManagerBot
             var result = RefreshFuelPrices();
             result.WaitAndUnwrapException();
             return _fuelInfo == null ? null : _fuelInfo.Where(fi => fi.Station_Short_Name == stationOrSystemName || 
-                fi.System_Name == stationOrSystemName ||
-                fi.Station_Name == stationOrSystemName ||
-                fi.Station_Short_Name.StartsWith(stationOrSystemName) ||
-                fi.Station_Short_Name.EndsWith(stationOrSystemName));
+                String.Equals(fi.System_Name, stationOrSystemName, StringComparison.CurrentCultureIgnoreCase) ||
+                String.Equals(fi.Station_Name, stationOrSystemName, StringComparison.CurrentCultureIgnoreCase) ||
+                fi.Station_Short_Name.ToLower().StartsWith(stationOrSystemName.ToLower()) ||
+                fi.Station_Short_Name.ToLower().EndsWith(stationOrSystemName.ToLower()));
+        }
+
+        public IEnumerable<string> GetValidSystemNames()
+        {
+            var result = RefreshFuelPrices();
+            result.WaitAndUnwrapException();
+            return _fuelInfo.Select(fi => fi.System_Name).Distinct().OrderBy(x => x).ToList();
+        }
+
+        public IEnumerable<string> GetValidSystemShortcuts()
+        {
+            var result = RefreshFuelPrices();
+            result.WaitAndUnwrapException();
+            return _fuelInfo.Select(fi => fi.Station_Short_Name.Substring(0, fi.Station_Short_Name.IndexOf('/'))).Distinct().OrderBy(x => x).ToList();
         }
     }
 }
