@@ -39,10 +39,10 @@ namespace TauManagerBot.Commands
             resultBuilder.AppendLine("├──────────┼─────────┼──────────────────────┼─────────┤");
             foreach(var fuelInfo in result)
             {
-                resultBuilder.AppendFormat("│ {0,8} │ {1,7:F2} │ {2:u} │ {3,7:F2} │",
+                resultBuilder.AppendFormat("│ {0,8} │ {1} │ {2} │ {3,7:F2} │",
                     fuelInfo.Station_Short_Name,
-                    fuelInfo.Last_Price,
-                    fuelInfo.Last_Reading,
+                    fuelInfo.Last_Price < 1 ? "  N/A  " : String.Format("{0,7:F2}", fuelInfo.Last_Price),
+                    fuelInfo.Last_Price < 1 ? "    --outdated--    " : String.Format("{0:u}", fuelInfo.Last_Reading),
                     fuelInfo.Estimation.HasValue ?
                         String.Format("{0,7:F2}", (double)fuelInfo.Estimation.Value) :
                         "   N/A");
